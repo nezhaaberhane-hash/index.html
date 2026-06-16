@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Subduction Océanique-Continentale — Vidéo Éducative</title>
+<style>
+:root {
+  --bg: #060a12;
+  --panel: rgba(8,14,28,0.96);
+  --accent: #38bdf8;
+  --accent2: #f97316;
+  --border: #1e3a5f;
+  --text: #f0f6ff;
+  --muted: #7a9abf;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ── TITLE BAR ── */
+#title-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 24px;
+  background: linear-gradient(90deg, #060e1e, #0b1628);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  z-index: 20;
+}
+#title-bar h1 {
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  background: linear-gradient(90deg, #38bdf8, #818cf8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+#title-bar .sub {
+  font-size: 0.72rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+#step-badge {
+  background: rgba(56,189,248,0.1);
+  border: 1px solid rgba(56,189,248,0.35);
+  border-radius: 20px;
+  padding: 4px 14px;
+  font-size: 0.75rem;
+  color: var(--accent);
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+/* ── MAIN AREA ── */
+#main {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+
+/* ── CANVAS ZONE ── */
+#canvas-wrap {
+  position: relative;
+  flex: 1;
+  overflow: hidden;
+}
+canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* ── INTERACTION OVERLAY (TRANSPARENT BANNER) ── */
+#start-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(6, 10, 18, 0.35);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  backdrop-filter: blur(2px);
+}
+#start-box {
+  background: rgba(8, 14, 28, 0.95);
+  padding: 24px 40px;
+  border-radius: 16px;
+  border: 1px solid var(--accent);
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+#start-box p {
+  font-size: 0.9rem;
+  margin-bottom: 15px;
+  color: #b8d0ec;
+}
+#start-btn {
+  background: linear-gradient(135deg, #38bdf8, #818cf8);
+  color: #060a12;
+  border: none;
+  padding: 12px 28px;
+  font-size: 1rem;
+  font-weight: 700;
+  border-radius: 25px;
+  cursor: pointer;
+  box-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+#start-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 25px rgba(56, 189, 248, 0.6);
+}
+
+#caption-box {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  top: 10px;
+  width: min(560px, 72%);
+  background: rgba(4,10,22,0.88);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(56,189,248,0.25);
+  border-radius: 10px;
+  padding: 10px 16px;
+  pointer-events: none;
+  z-index: 10;
+  transition: opacity 0.5s;
+}
+#caption-stage {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 4px;
+}
+#caption-title {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 4px;
+  line-height: 1.2;
+}
+#caption-desc {
+  font-size: 0.76rem;
+  color: #b8d0ec;
+  line-height: 1.45;
+}
+
+/* ── VIDEO CONTROLS ── */
+#controls {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 10px 20px 14px;
+  background: linear-gradient(0deg, rgba(4,10,22,0.97) 80%, transparent);
+  z-index: 15;
+}
+#progress-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+#time-label {
+  font-size: 0.72rem;
+  font-family: monospace;
+  color: var(--muted);
+  min-width: 28px;
+}
+#timeline-wrap {
+  flex: 1;
+  position: relative;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+#timeline-track {
+  width: 100%;
+  height: 5px;
+  background: #1a2d44;
+  border-radius: 3px;
+  position: relative;
+  overflow: hidden;
+}
+#timeline-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #38bdf8, #818cf8);
+  border-radius: 3px;
+  width: 0%;
+}
+#timeline-input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  opacity: 0;
+  cursor: pointer;
+  height: 20px;
+  -webkit-appearance: none;
+}
+#chapter-markers {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+.chapter-dot {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: rgba(56,189,248,0.5);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  top: 50%;
+  border: 1px solid #38bdf8;
+}
+.chapter-dot.passed { background: #38bdf8; }
+#total-label {
+  font-size: 0.72rem;
+  font-family: monospace;
+  color: var(--muted);
+}
+
+#btn-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.vbtn {
+  background: rgba(30,58,92,0.6);
+  border: 1px solid var(--border);
+  color: var(--text);
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+.vbtn:hover { background: rgba(56,189,248,0.15); border-color: var(--accent); }
+.vbtn.primary {
+  background: var(--accent);
+  color: #060e1e;
+  border: none;
+  font-size: 1.1rem;
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  font-weight: 700;
+}
+.vbtn.primary:hover { background: #0ea5e9; }
+
+.speed-select {
+  background: rgba(30,58,92,0.6);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  cursor: pointer;
+  outline: none;
+}
+.speed-select:focus { border-color: var(--accent); }
+
+.chapter-pills {
+  display: flex;
+  gap: 6px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  margin-left: auto;
+  scrollbar-width: none;
+}
+.chapter-pills::-webkit-scrollbar { display: none; }
+.cpill {
+  flex-shrink: 0;
+  background: rgba(30,58,92,0.5);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.68rem;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.cpill:hover { border-color: var(--accent); color: var(--accent); }
+.cpill.active { background: rgba(56,189,248,0.15); border-color: var(--accent); color: var(--accent); font-weight: 600; }
+
+/* ── SIDEBAR ── */
+#sidebar {
+  width: 240px;
+  background: var(--panel);
+  border-left: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  overflow-y: auto;
+}
+#sidebar-header {
+  padding: 16px 18px 12px;
+  border-bottom: 1px solid var(--border);
+}
+#sidebar-header h2 {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--accent);
+  margin-bottom: 10px;
+}
+.chapter-list { padding: 10px 0; }
+.chap-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 18px;
+  cursor: pointer;
+  border-left: 3px solid transparent;
+  transition: all 0.15s;
+}
+.chap-item:hover { background: rgba(56,189,248,0.06); }
+.chap-item.active {
+  background: rgba(56,189,248,0.1);
+  border-left-color: var(--accent);
+}
+.chap-num {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--muted);
+  min-width: 16px;
+  margin-top: 2px;
+}
+.chap-item.active .chap-num { color: var(--accent); }
+.chap-text { font-size: 0.78rem; line-height: 1.3; color: var(--muted); }
+.chap-item.active .chap-text { color: #fff; }
+.chap-item.done .chap-text { color: rgba(56,189,248,0.6); }
+
+#sidebar-info {
+  margin: 0 12px 12px;
+  background: rgba(56,189,248,0.05);
+  border: 1px solid rgba(56,189,248,0.15);
+  border-radius: 8px;
+  padding: 12px;
+}
+#sidebar-info h3 {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--accent);
+  margin-bottom: 6px;
+}
+#sidebar-info p {
+  font-size: 0.76rem;
+  line-height: 1.5;
+  color: var(--muted);
+}
+</style>
+</head>
+<body>
+
+<div id="title-bar">
+  <div>
+    <h1>Subduction Océanique-Continentale</h1>
+    <div class="sub">Modélisation Géodynamique Interactive — Animation Éducative</div>
+  </div>
+  <div id="step-badge">Étape 1 / 7</div>
+</div>
+
+<div id="main">
+  <div id="start-overlay">
+    <div id="start-box">
+      <p>Prêt à lancer la modélisation géologique ?</p>
+      <button id="start-btn">Démarrer la narration continue</button>
+    </div>
+  </div>
+
+  <div id="canvas-wrap">
+    <canvas id="sim"></canvas>
+
+    <div id="caption-box">
+      <div id="caption-stage">Étape 1 — Convergence</div>
+      <div id="caption-title">Marges convergentes initiales</div>
+      <div id="caption-desc">État initial stable du système lithosphérique avant compression.</div>
+    </div>
+
+    <div id="controls">
+      <div id="progress-row">
+        <span id="time-label">0%</span>
+        <div id="timeline-wrap">
+          <div id="timeline-track">
+            <div id="timeline-fill"></div>
+            <div id="chapter-markers"></div>
+          </div>
+          <input type="range" id="timeline-input" min="1" max="12" step="0.01" value="1">
+        </div>
+        <span id="total-label">Fin</span>
+      </div>
+      <div id="btn-row">
+        <button class="vbtn" id="btn-restart" title="Recommencer">⏮</button>
+        <button class="vbtn" id="btn-prev" title="Étape précédente">⏪</button>
+        <button class="vbtn primary" id="btn-play">▶</button>
+        <button class="vbtn" id="btn-next" title="Étape suivante">⏩</button>
+        <select class="speed-select" id="speed-select">
+          <option value="0.25">0.25×</option>
+          <option value="0.5">0.5×</option>
+          <option value="1" selected>1×</option>
+          <option value="1.5">1.5×</option>
+          <option value="2">2×</option>
+        </select>
+        <button class="vbtn" id="btn-mute" title="Activer / couper la narration">🔊</button>
+        <div class="chapter-pills" id="chapter-pills"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="sidebar">
+    <div id="sidebar-header">
+      <h2>Chapitres</h2>
+    </div>
+    <div class="chapter-list" id="chapter-list"></div>
+    <div id="sidebar-info">
+      <h3>Structure active</h3>
+      <p id="sidebar-detail">Déroulement automatique de la dynamique des plaques.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// DATA — STRUCTURE GÉOLOGIQUE ET SEUILS DE TIMELINE
+// ═══════════════════════════════════════════════════════
+const CHAPTERS = [
+  { id: 1, step: 1.0, endStep: 2.5, label: "Convergence", title: "Convergence des plaques tectoniques", desc: "Les forces géodynamiques globales mettent en mouvement deux plaques lithosphériques. La plaque océanique, dense et froide, converge vers la plaque continentale." },
+  { id: 2, step: 2.5, endStep: 4.5, label: "Flexion & Fosse", title: "Formation de la fosse océanique", desc: "La plaque océanique fléchit sous le poids de la convergence. Une dépression abyssale asymétrique se forme : la fosse océanique. Un prisme d'accrétion sédimentaire s'accumule." },
+  { id: 3, step: 4.5, endStep: 6.0, label: "Subduction", title: "Plongée de la plaque océanique", desc: "La plaque océanique s'enfonce irréversiblement sous la croûte continentale. Son excès de densité la force à plonger dans l'asthénosphère sous un angle d'environ 42°." },
+  { id: 4, step: 6.0, endStep: 7.5, label: "Wadati-Benioff", title: "Plan de Wadati-Benioff", desc: "La friction intense entre le panneau plongeant rigide et le manteau environnant génère des ruptures cassantes. Les foyers sismiques s'alignent le long du plan incliné de Wadati-Benioff." },
+  { id: 5, step: 7.5, endStep: 9.5, label: "Fusion partielle", title: "Fusion partielle des péridotites", desc: "La chaleur et la pression libèrent des fluides de la croûte subduite. Ces fluides hydratent le manteau supérieur et abaissent le solidus des péridotites, déclenchant leur fusion partielle." },
+  { id: 6, step: 9.5, endStep: 11.0, label: "Remontée du magma", title: "Remontée magmatique et chambre", desc: "Les magmas générés, chauds et peu denses, migrent verticalement par diapirisme. Ils s'accumulent sous la croûte continentale au sein d'une chambre magmatique." },
+  { id: 7, step: 11.0, endStep: 12.0, label: "Volcan d'arc", title: "Formation du volcan d'arc continental", desc: "Le magma monte à travers le conduit jusqu'au cratère, donnant naissance à un volcanisme d'arc continental caractérisé par des éruptions explosives très visqueuses." }
+];
+
+const GEO_LABELS = { TOTAL_STEPS: 12 };
+
+// TEXTE GLOBAL UNIQUE POUR UN FLUX AUDIO SANS AUCUNE COUPURE
+const FULL_NARRATION_TEXT = 
+  "Deux plaques lithosphériques convergent, poussées par les courants de convection globaux. La plaque océanique, dense et froide, se rapproche inexorablement de la marge continentale stable. " +
+  "Sous l'effet des contraintes compressives majeures, la lithosphère océanique fléchit, initiant une profonde dépression asymétrique nommée fosse océanique, tandis qu'un prisme d'accrétion s'édifie. " +
+  "Devenue trop dense, la plaque océanique s'enfonce de manière irréversible sous la plaque continentale et plonge directement dans l'asthénosphère sous un angle moyen de quarante-deux degrés. " +
+  "La friction mécanique intense entre le panneau plongeant rigide et le manteau chevauchant génère de fortes ruptures sismiques. Les foyers s'alignent le long du plan incliné de Wadati-Benioff. " +
+  "En s'enfonçant, la chaleur et la pression chassent l'eau de la croûte. Ces fluides hydratent le coin de manteau supérieur, abaissant le point de fusion des péridotites ce qui déclenche leur fusion partielle. " +
+  "Les gouttes de magma formées, moins denses que les roches encaissantes, s'élèvent verticalement par diapirisme à travers la lithosphère et se regroupent dans une vaste chambre magmatique. " +
+  "Sous l'effet de la surpression, le magma visqueux et riche en gaz remonte le conduit volcanique jusqu'à la surface terrestre, alimentant de violentes éruptions qui forment un volcan d'arc continental.";
+
+// REFS INTERFACES
+const canvas = document.getElementById('sim');
+const ctx = canvas.getContext('2d');
+const wrap = document.getElementById('canvas-wrap');
+const timelineInput = document.getElementById('timeline-input');
+const timelineFill = document.getElementById('timeline-fill');
+const timeLbl = document.getElementById('time-label');
+const btnPlay = document.getElementById('btn-play');
+const btnPrev = document.getElementById('btn-prev');
+const btnNext = document.getElementById('btn-next');
+const btnRestart = document.getElementById('btn-restart');
+const speedSelect = document.getElementById('speed-select');
+const captionStage = document.getElementById('caption-stage');
+const captionTitle = document.getElementById('caption-title');
+const captionDesc = document.getElementById('caption-desc');
+const stepBadge = document.getElementById('step-badge');
+const chapterList = document.getElementById('chapter-list');
+const chapterPills = document.getElementById('chapter-pills');
+const chapterMarkersEl = document.getElementById('chapter-markers');
+const startOverlay = document.getElementById('start-overlay');
+const startBtn = document.getElementById('start-btn');
+const btnMute = document.getElementById('btn-mute');
+
+// ENGINE MOTOR STATE
+let W, H;
+let currentStep = 1.0;
+let isPlaying = false;
+let lastTs = 0;
+let speed = 1.0;
+let view = { x: 0, y: 0, zoom: 1 };
+let rockNoise = [];
+let camTarget = { x: 0, y: 0, zoom: 1 };
+let camCurrent = { x: 0, y: 0, zoom: 1 };
+
+// AUDIO MOTOR VARIABLES
+let narratorMuted = false;
+let activeUtterance = null;
+let totalCharacters = FULL_NARRATION_TEXT.length;
+let currentCharacterOffset = 0;
+
+function buildUI() {
+  CHAPTERS.forEach(ch => {
+    const el = document.createElement('div');
+    el.className = 'chap-item';
+    el.dataset.id = ch.id;
+    el.innerHTML = `<span class="chap-num">${ch.id}</span><span class="chap-text">${ch.label}</span>`;
+    el.addEventListener('click', () => jumpToStep(ch.step));
+    chapterList.appendChild(el);
+  });
+  CHAPTERS.forEach(ch => {
+    const el = document.createElement('button');
+    el.className = 'cpill';
+    el.dataset.id = ch.id;
+    el.textContent = ch.label;
+    el.addEventListener('click', () => jumpToStep(ch.step));
+    chapterPills.appendChild(el);
+  });
+  CHAPTERS.forEach(ch => {
+    const pct = ((ch.step - 1) / (GEO_LABELS.TOTAL_STEPS - 1)) * 100;
+    const dot = document.createElement('div');
+    dot.className = 'chapter-dot';
+    dot.style.left = pct + '%';
+    chapterMarkersEl.appendChild(dot);
+  });
+}
+
+function getActiveChapter(step) {
+  let active = CHAPTERS[0];
+  for (const ch of CHAPTERS) {
+    if (step >= ch.step) active = ch;
+  }
+  return active;
+}
+
+function updateUIElements() {
+  const ch = getActiveChapter(currentStep);
+  document.querySelectorAll('.chap-item').forEach(el => {
+    const id = parseInt(el.dataset.id);
+    el.classList.toggle('active', id === ch.id);
+    el.classList.toggle('done', id < ch.id);
+  });
+  document.querySelectorAll('.cpill').forEach(el => {
+    el.classList.toggle('active', parseInt(el.dataset.id) === ch.id);
+  });
+  stepBadge.textContent = `Étape ${ch.id} / ${CHAPTERS.length}`;
+  
+  captionStage.textContent = `Étape ${ch.id} — ${ch.label}`;
+  captionTitle.textContent = ch.title;
+  captionDesc.textContent = ch.desc;
+
+  const pct = ((currentStep - 1) / (GEO_LABELS.TOTAL_STEPS - 1)) * 100;
+  timelineFill.style.width = pct + '%';
+  timelineInput.value = currentStep;
+  timeLbl.textContent = Math.round(pct) + '%';
+
+  updateCameraTarget(currentStep);
+}
+
+function jumpToStep(stepTarget) {
+  currentStep = stepTarget;
+  currentCharacterOffset = ((currentStep - 1) / (GEO_LABELS.TOTAL_STEPS - 1)) * totalCharacters;
+  updateUIElements();
+  if (isPlaying) {
+    playContinuousVoiceFromOffset(currentCharacterOffset);
+  }
+}
+
+function updateCameraTarget(step) {
+  if (step < 2.5) camTarget = { x: W * 0.04, y: H * 0.22, zoom: 0.75 };
+  else if (step < 4.5) camTarget = { x: W * 0.04 - 30, y: H * 0.22, zoom: 0.76 };
+  else if (step < 6.0) camTarget = { x: W * 0.03 - 40, y: H * 0.21, zoom: 0.77 };
+  else if (step < 7.5) camTarget = { x: W * 0.02 - 50, y: H * 0.20, zoom: 0.78 };
+  else if (step < 9.5) camTarget = { x: W * 0.01 - 60, y: H * 0.19, zoom: 0.79 };
+  else if (step < 11.0) camTarget = { x: W * 0.0, y: H * 0.18, zoom: 0.80 };
+  else camTarget = { x: W * 0.0 - 40, y: H * 0.17, zoom: 0.80 };
+}
+
+function lerpCam(dt) {
+  const k = Math.min(1, dt * 2.5);
+  camCurrent.x += (camTarget.x - camCurrent.x) * k;
+  camCurrent.y += (camTarget.y - camCurrent.y) * k;
+  camCurrent.zoom += (camTarget.zoom - camCurrent.zoom) * k;
+  view.x = camCurrent.x; view.y = camCurrent.y; view.zoom = camCurrent.zoom;
+}
+
+// GÉOMÉTRIE DE SUBDUCTION
+const TRENCH = 550;
+function getSlabY(x, step) {
+  const hY = 160;
+  if (x < TRENCH) {
+    if (step >= 3 && x > TRENCH - 120) {
+      const ff = Math.min(1, (step - 3) / 2);
+      const dx = (x - (TRENCH - 120)) / 120;
+      return hY + Math.pow(dx, 3) * 20 * ff;
+    }
+    return hY;
+  } else {
+    if (step < 4) return hY;
+    const pf = Math.min(1, (step - 4) / 7);
+    const dx = x - TRENCH;
+    const maxDip = 42 * (Math.PI / 180);
+    const dip = maxDip * Math.min(1, (step - 3) / 8);
+    const maxX = TRENCH + pf * 550;
+    if (x > maxX) return null;
+    const blend = 100;
+    if (dx < blend) {
+      const t = dx / blend;
+      return (hY + 20) * (1 - t) + (hY + dx * Math.tan(dip)) * t;
+    }
+    return hY + dx * Math.tan(dip);
+  }
+}
+
+function resize() {
+  if (!wrap) return;
+  W = canvas.width = wrap.clientWidth;
+  H = canvas.height = wrap.clientHeight;
+  updateCameraTarget(currentStep);
+  camCurrent = { ...camTarget }; view = { ...camCurrent };
+}
+window.addEventListener('resize', resize);
+
+function initNoise() {
+  rockNoise = [];
+  for (let i = 0; i < 220; i++) {
+    rockNoise.push({ x: Math.random() * 2200, y: Math.random() * 1200, size: 1 + Math.random() * 3, a: 0.07 + Math.random() * 0.18 });
+  }
+}
+
+function drawArrow(fx, fy, tx, ty, color) {
+  const a = Math.atan2(ty - fy, tx - fx);
+  const hl = 22, hw = Math.PI / 5.5;
+  ctx.save();
+  ctx.shadowColor = color; ctx.shadowBlur = 14;
+  ctx.strokeStyle = color; ctx.lineWidth = 6; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(fx, fy);
+  ctx.lineTo(tx - hl * 0.7 * Math.cos(a), ty - hl * 0.7 * Math.sin(a));
+  ctx.stroke();
+  ctx.fillStyle = color;
+  ctx.beginPath(); ctx.moveTo(tx, ty);
+  ctx.lineTo(tx - hl * Math.cos(a - hw), ty - hl * Math.sin(a - hw));
+  ctx.lineTo(tx - hl * 0.55 * Math.cos(a), ty - hl * 0.55 * Math.sin(a));
+  ctx.lineTo(tx - hl * Math.cos(a + hw), ty - hl * Math.sin(a + hw));
+  ctx.closePath(); ctx.fill();
+  ctx.restore();
+}
+
+function label(text, x, y) {
+  ctx.save(); font = 'bold 12px system-ui,sans-serif';
+  ctx.font = font; const tw = ctx.measureText(text).width;
+  ctx.fillStyle = 'rgba(3,8,18,0.9)';
+  ctx.beginPath(); ctx.roundRect(x - 7, y - 15, tw + 14, 22, 4); ctx.fill();
+  ctx.strokeStyle = 'rgba(56,189,248,0.55)'; ctx.lineWidth = 1.2;
+  ctx.beginPath(); ctx.roundRect(x - 7, y - 15, tw + 14, 22, 4); ctx.stroke();
+  ctx.fillStyle = '#f0f6ff'; ctx.fillText(text, x, y);
+  ctx.restore();
+}
+
+// ═══════════════════════════════════════════════════════
+// CONTINUOUS AUDIO ENGINE MOTOR (FUSIONNÉ)
+// ═══════════════════════════════════════════════════════
+function stopVoiceEngine() {
+  if ('speechSynthesis' in window) {
+    speechSynthesis.cancel();
+  }
+}
+
+function playContinuousVoiceFromOffset(offset) {
+  if (!('speechSynthesis' in window) || narratorMuted) return;
+  stopVoiceEngine();
+
+  // On extrait la partie restante du texte global
+  const remainingText = FULL_NARRATION_TEXT.substring(Math.floor(offset));
+  if (!remainingText || remainingText.trim().length === 0) return;
+
+  activeUtterance = new SpeechSynthesisUtterance(remainingText);
+  activeUtterance.lang = 'fr-FR';
+  activeUtterance.rate = 1.0 * speed;
+
+  const voices = speechSynthesis.getVoices();
+  const frVoice = voices.find(v => v.lang.startsWith('fr'));
+  if (frVoice) activeUtterance.voice = frVoice;
+
+  // L'animation écoute la progression exacte de la prononciation des caractères
+  activeUtterance.onboundary = (event) => {
+    if (!isPlaying) return;
+    if (event.name === 'word' || event.name === 'sentence') {
+      const globalCharIndex = offset + event.charIndex;
+      const ratio = Math.min(1, globalCharIndex / totalCharacters);
+      // Alignement parfait et fluide du pas géologique sur le son
+      currentStep = 1.0 + ratio * (GEO_LABELS.TOTAL_STEPS - 1);
+      updateUIElements();
+    }
+  };
+
+  activeUtterance.onend = () => {
+    if (isPlaying) {
+      currentStep = GEO_LABELS.TOTAL_STEPS;
+      isPlaying = false;
+      btnPlay.textContent = '▶';
+      updateUIElements();
+    }
+  };
+
+  speechSynthesis.speak(activeUtterance);
+}
+
+// LOOP DE RENDU VISUEL SANS DISTORSION
+function render(ts) {
+  if (!lastTs) lastTs = ts;
+  const dt = Math.min((ts - lastTs) / 1000, 0.1);
+  lastTs = ts;
+
+  lerpCam(dt);
+  const step = currentStep;
+
+  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = '#060a12'; ctx.fillRect(0, 0, W, H);
+
+  ctx.save();
+  ctx.translate(view.x, view.y);
+  ctx.scale(view.zoom, view.zoom);
+
+  // Manteau / Asthénosphère
+  const ag = ctx.createLinearGradient(400, 200, 400, 750);
+  ag.addColorStop(0, '#2a110a'); ag.addColorStop(0.4, '#3e1204'); ag.addColorStop(1, '#1a0500');
+  ctx.fillStyle = ag; ctx.fillRect(-300, 200, 1700, 700);
+  
+  ctx.fillStyle = '#ffffff';
+  rockNoise.forEach(p => { ctx.globalAlpha = p.a; ctx.fillRect(p.x, p.y, p.size, p.size); });
+  ctx.globalAlpha = 1;
+
+  // Isothermes symétriques
+  if (step >= 6) {
+    const tf = Math.min(1, (step - 6) / 2);
+    [600, 1000, 1300].forEach((temp, i) => {
+      ctx.strokeStyle = `rgba(239,68,68,${0.18 + i * 0.14 * tf})`; ctx.lineWidth = 1.8;
+      ctx.beginPath(); const baseY = 260 + i * 110;
+      for (let x = -100; x <= 1300; x += 28) {
+        let y = baseY; const sY = getSlabY(x, step);
+        if (sY !== null && x > TRENCH) {
+          const d = Math.abs(sY - y);
+          if (d < 160) { const pf = (1 - d / 160) * 0.85 * tf; y += (sY - y + 30) * pf; }
+        }
+        x === -100 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+    });
+  }
+
+  // Libération d'eau (Fluides)
+  if (step >= 8) {
+    ctx.fillStyle = 'rgba(56,189,248,0.65)';
+    for (let px = 640; px < 760; px += 24) {
+      const sY = getSlabY(px, step);
+      if (sY !== null) {
+        const by = sY - 5 - ((ts * 0.03 + px) % 50);
+        if (by > 200) { ctx.beginPath(); ctx.arc(px + Math.sin(ts * 0.01 + px) * 5, by, 2, 0, Math.PI * 2); ctx.fill(); }
+      }
+    }
+  }
+
+  // Fusion partielle des Péridotites
+  if (step >= 9) {
+    const mf = Math.min(1, step - 9);
+    const mg = ctx.createRadialGradient(760, 310, 10, 760, 310, 90);
+    mg.addColorStop(0, `rgba(249,115,22,${0.65 * mf})`);
+    mg.addColorStop(0.6, `rgba(234,179,8,${0.28*mf})`);
+    mg.addColorStop(1, 'rgba(234,179,8,0)');
+    ctx.fillStyle = mg; ctx.beginPath(); ctx.arc(760, 310, 90, 0, Math.PI * 2); ctx.fill();
+  }
+
+  // Chambre magmatique crustale
+  if (step >= 10) {
+    const mf = Math.min(1, step - 10);
+    ctx.save(); ctx.shadowBlur = 20; ctx.shadowColor = '#ff4500';
+    const dg = ctx.createRadialGradient(760, 280, 4, 760, 280, 24);
+    dg.addColorStop(0, `rgba(255,220,60,${0.95 * mf})`); dg.addColorStop(1, `rgba(255,69,0,${0.75 * mf})`);
+    ctx.fillStyle = dg; ctx.beginPath(); ctx.ellipse(760, 285, 22, 18, 0, 0, Math.PI * 2); ctx.fill();
+
+    const cmg = ctx.createLinearGradient(760, 270, 820, 185);
+    cmg.addColorStop(0, `rgba(255,180,30,${0.95 * mf})`); cmg.addColorStop(1, `rgba(255,60,0,${0.88 * mf})`);
+    ctx.strokeStyle = cmg; ctx.lineWidth = 18; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(760, 270); ctx.bezierCurveTo(763, 248, 795, 225, 820, 185); ctx.stroke();
+
+    const chg = ctx.createRadialGradient(820, 185, 5, 820, 185, 32);
+    chg.addColorStop(0, `rgba(255,230,60,${0.98 * mf})`); chg.addColorStop(0.5, `rgba(255,110,0,${0.88 * mf})`);
+    chg.addColorStop(1, `rgba(200,40,0,${0.65 * mf})`);
+    ctx.fillStyle = chg; ctx.beginPath(); ctx.ellipse(820, 185, 32, 22, -0.1, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+  }
+
+  // Croûte continentale solide layered
+  const cX = TRENCH;
+  ctx.fillStyle = '#3a2a20'; ctx.fillRect(cX, 200, 800, 60);
+  ctx.fillStyle = '#614e43'; ctx.fillRect(cX, 160, 800, 40);
+  ctx.fillStyle = '#8a7366';
+  ctx.beginPath(); ctx.moveTo(cX, 160); ctx.lineTo(1300, 160); ctx.lineTo(1300, 200); ctx.lineTo(cX, 200); ctx.closePath(); ctx.fill();
+
+  // Cône volcanique d'arc
+  if (step >= 11) {
+    const vf = Math.min(1, step - 11);
+    ctx.fillStyle = '#52443c';
+    ctx.beginPath(); ctx.moveTo(770, 160); ctx.lineTo(815, 85 - vf * 5); ctx.lineTo(845, 85 - vf * 5); ctx.lineTo(890, 160); ctx.closePath(); ctx.fill();
+  }
+
+  // Lithosphère Océanique Plongeante
+  const offsetDistance = Math.min(160, (step - 1) * 16);
+  const xStart = -200 + offsetDistance, xEnd = 1200;
+  let validPts = []; let cx2 = xStart;
+  ctx.fillStyle = '#16222f'; ctx.beginPath(); ctx.moveTo(xStart, getSlabY(xStart, step) || 160);
+  while (cx2 <= xEnd) {
+    const y = getSlabY(cx2, step); if (y === null) break;
+    if (step < 4 && cx2 >= TRENCH) break;
+    validPts.push({ x: cx2, y }); ctx.lineTo(cx2, y); cx2 += 8;
+  }
+  for (let i = validPts.length - 1; i >= 0; i--) ctx.lineTo(validPts[i].x, validPts[i].y + 80);
+  ctx.closePath(); ctx.fill();
+
+  if (validPts.length > 0) {
+    ctx.fillStyle = '#2c4c5e'; ctx.beginPath(); ctx.moveTo(validPts[0].x, validPts[0].y);
+    validPts.forEach(p => ctx.lineTo(p.x, p.y));
+    for (let i = validPts.length - 1; i >= 0; i--) ctx.lineTo(validPts[i].x, validPts[i].y + 14);
+    ctx.closePath(); ctx.fill();
+  }
+
+  // Fosse Océanique active
+  if (step >= 4) {
+    const tf = Math.min(1, (step - 4) / 2);
+    const td = 55 * tf, twL = 60, twR = 22;
+    ctx.fillStyle = '#2e3d4e'; ctx.beginPath(); ctx.moveTo(TRENCH - twL, 160);
+    ctx.quadraticCurveTo(TRENCH - 20, 160 + td * 0.4, TRENCH, 160 + td);
+    ctx.quadraticCurveTo(TRENCH + 10, 160 + td * 0.3, TRENCH + twR, 160);
+    ctx.closePath(); ctx.fill();
+  }
+
+  // Sismicité Benioff
+  if (step >= 5) {
+    const sf = Math.min(1, step - 5);
+    [{ dx: 60, d: 25, c: '#f43f5e' }, { dx: 130, d: 50, c: '#fb923c' }, { dx: 220, d: 95, c: '#facc15' }].forEach(q => {
+      const qx = TRENCH + q.dx, sy = getSlabY(qx, step);
+      if (sy !== null && step * 1.1 >= (5 + q.dx / 100)) {
+        const qy = sy + q.d * 0.5; ctx.fillStyle = q.c; ctx.globalAlpha = sf;
+        ctx.beginPath(); ctx.arc(qx, qy, 6, 0, Math.PI * 2); ctx.fill();
+      }
+    });
+    ctx.globalAlpha = 1;
+  }
+
+  // Vecteurs de mouvement
+  if (step >= 2 && step < 7) {
+    const aa = step < 3 ? (step - 2) : 1.0;
+    const ap = 0.5 + 0.5 * Math.sin(ts * 0.003), ao = ap * 12;
+    ctx.globalAlpha = Math.max(0.35, aa);
+    drawArrow(140 + ao, 110, 230 + ao, 110, '#38bdf8');
+    drawArrow(1010 - ao, 110, 920 - ao, 110, '#a8a29e');
+    ctx.globalAlpha = 1;
+  }
+
+  // LABELS TEXTES
+  label('Plaque océanique', 80, 145);
+  label('Plaque continentale', 900, 145);
+  if (step >= 4) label('Fosse océanique', TRENCH - 75, 128);
+  if (step >= 5) label('Plan de Wadati-Benioff', TRENCH + 80, 250);
+  if (step >= 9) label('Fusion partielle des péridotites', 620, 350);
+  if (step >= 10) label('Chambre magmatique', 740, 210);
+  if (step >= 11) label('Volcan d\'arc', 810, 70);
+
+  ctx.restore();
+  requestAnimationFrame(render);
+}
+
+// ═══════════════════════════════════════════════════════
+// CONTROLES ET LISTENERS INTERACTION
+// ═══════════════════════════════════════════════════════
+startBtn.addEventListener('click', () => {
+  startOverlay.style.display = 'none';
+  isPlaying = true;
+  btnPlay.textContent = '⏸';
+  currentCharacterOffset = 0;
+  playContinuousVoiceFromOffset(0);
+});
+
+btnPlay.addEventListener('click', () => {
+  isPlaying = !isPlaying;
+  btnPlay.textContent = isPlaying ? '⏸' : '▶';
+  if (isPlaying) {
+    if (currentStep >= GEO_LABELS.TOTAL_STEPS) {
+      currentStep = 1.0; currentCharacterOffset = 0;
+    } else {
+      currentCharacterOffset = ((currentStep - 1) / (GEO_LABELS.TOTAL_STEPS - 1)) * totalCharacters;
+    }
+    playContinuousVoiceFromOffset(currentCharacterOffset);
+  } else {
+    stopVoiceEngine();
+  }
+});
+
+btnRestart.addEventListener('click', () => {
+  currentStep = 1.0; isPlaying = true; btnPlay.textContent = '⏸';
+  currentCharacterOffset = 0; updateUIElements();
+  playContinuousVoiceFromOffset(0);
+});
+
+btnPrev.addEventListener('click', () => {
+  const ch = getActiveChapter(currentStep);
+  const idx = CHAPTERS.indexOf(ch);
+  const prevCh = CHAPTERS[Math.max(0, idx - 1)];
+  jumpToStep(prevCh.step);
+});
+
+btnNext.addEventListener('click', () => {
+  const ch = getActiveChapter(currentStep);
+  const idx = CHAPTERS.indexOf(ch);
+  const nextCh = CHAPTERS[Math.min(CHAPTERS.length - 1, idx + 1)];
+  jumpToStep(nextCh.step);
+});
+
+speedSelect.addEventListener('change', () => {
+  speed = parseFloat(speedSelect.value);
+  if (isPlaying) {
+    currentCharacterOffset = ((currentStep - 1) / (GEO_LABELS.TOTAL_STEPS - 1)) * totalCharacters;
+    playContinuousVoiceFromOffset(currentCharacterOffset);
+  }
+});
+
+timelineInput.addEventListener('input', e => {
+  isPlaying = false; btnPlay.textContent = '▶';
+  stopVoiceEngine();
+  currentStep = parseFloat(e.target.value);
+  currentCharacterOffset = ((currentStep - 1) / (GEO_LABELS.TOTAL_STEPS - 1)) * totalCharacters;
+  updateUIElements();
+});
+
+btnMute.addEventListener('click', () => {
+  narratorMuted = !narratorMuted;
+  btnMute.textContent = narratorMuted ? '🔇' : '🔊';
+  if (narratorMuted) stopVoiceEngine();
+  else if (isPlaying) {
+    currentCharacterOffset = ((currentStep - 1) / (GEO_LABELS.TOTAL_STEPS - 1)) * totalCharacters;
+    playContinuousVoiceFromOffset(currentCharacterOffset);
+  }
+});
+
+// ANTI-BUG DU NAVIGATEUR (Garde la synthèse éveillée toutes les 4 secondes)
+setInterval(() => {
+  if (isPlaying && !narratorMuted && ('speechSynthesis' in window)) {
+    if (speechSynthesis.speaking && !speechSynthesis.paused) {
+      speechSynthesis.pause();
+      speechSynthesis.resume();
+    }
+  }
+}, 4000);
+
+// EXECUTION INITIALE
+buildUI();
+initNoise();
+resize();
+updateUIElements();
+requestAnimationFrame(render);
+</script>
+</body>
+</html>
